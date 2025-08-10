@@ -73,7 +73,7 @@ def make_plot(xs, ys, xopt: Optional[float], yopt: Optional[float], f_true_xs, f
 # -------------------- Streamlit UI --------------------
 
 st.set_page_config(page_title="PyDDSBB 1D Global Optimization", layout="wide")
-st.title("🧭 PyDDSBB: 1D Global Optimization (dynamic sampling)")
+st.title("PyDDSBB: 1D Global Optimization (demo)")
 
 if PyDDSBB is None:
     st.error("PyDDSBB not available. On Streamlit Cloud, include `glpk` via packages.txt and install PyDDSBB from GitHub in requirements.txt.")
@@ -103,7 +103,7 @@ with st.sidebar:
 
     st.divider()
     auto_run = st.checkbox("Auto-run on change", value=False)
-    run_btn = st.button("🚀 Run optimization")
+    run_btn = st.button("Run optimization")
     resume_btn = st.button("↻ Resume with more budget")
 
 # Build objective and model
