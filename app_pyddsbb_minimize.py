@@ -36,7 +36,7 @@ def f_linear(x):
     return 2*x - 1
 
 FUNCTIONS = {
-    "Sine (sin(2πx))": f_sin2pix,
+    "xSine (sin(2πx))": f_sin2pix,
     "Sine (sin(3x) + 0.5 sin(7x))": f_sin_combo,
     "Polynomial (x^3 - 0.5x^2 + 0.2x)": f_poly,
     "Gaussian bump": f_gauss_bump,
