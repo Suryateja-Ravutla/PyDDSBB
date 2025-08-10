@@ -15,7 +15,7 @@ except Exception:
 # -------------------- Functions to optimize --------------------
 
 def f_sin2pix(x):        # sin(2πx)
-    return np.sin(2*np.pi*x)
+    return x*np.sin(2*np.pi*x)
 
 def f_sin_combo(x):      # sin(3x) + 0.5 sin(7x)
     return np.sin(3*x) + 0.5*np.sin(7*x)
