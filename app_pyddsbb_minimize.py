@@ -73,7 +73,7 @@ def make_plot(xs, ys, xopt: Optional[float], yopt: Optional[float], f_true_xs, f
 # -------------------- Streamlit UI --------------------
 
 st.set_page_config(page_title="PyDDSBB 1D Global Optimization", layout="wide")
-st.title("PyDDSBB: 1D Global Optimization (demo)")
+st.title("PyDDSBB Demo : 1D Global Optimization")
 
 if PyDDSBB is None:
     st.error("PyDDSBB not available. On Streamlit Cloud, include `glpk` via packages.txt and install PyDDSBB from GitHub in requirements.txt.")
@@ -196,4 +196,4 @@ with col_side:
         st.caption(f"n_init: {n_init} · split: {split_method} · var sel: {variable_selection}")
         st.caption(f"noise σ: {noise_std}")
 
-st.caption("PyDDSBB solves a black-box global optimization by building data-driven relaxations and adaptively sampling the domain. This demo uses a 1D objective f(x) with optional noise.")
+st.caption("PyDDSBB solves a black-box global optimization by building data-driven convex relaxations and adaptively sampling the domain. This demo uses a 1D objective f(x) with optional noise.")
