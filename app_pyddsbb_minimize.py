@@ -6,6 +6,11 @@ import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
 
+q = st.query_params
+if q.get("ping", ["0"])[0] == "1":
+    st.write("OK")
+    st.stop()
+    
 # Try import PyDDSBB
 try:
     import PyDDSBB
