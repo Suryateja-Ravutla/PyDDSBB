@@ -269,7 +269,7 @@ with col_main:
             n_levels = max(levels) + 1 if len(levels) else 1
             for level in levels:
                 shade = level / max(1, n_levels)
-                fill = f"rgba(128,128,128,{0.05 + 0.5*shade})"
+                fill = f"rgba(128,128,128,{0.05 + 0.25*shade})"
                 for node in tree[level].values():
                     x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
                     y0, y1 = level, level + 0.8
@@ -373,7 +373,7 @@ with col_main:
             n_levels = max(levels) + 1 if len(levels) else 1
             for level in levels:
                 shade = level / max(1, n_levels)
-                fill = f"rgba(128,128,128,{0.05 + 0.5*shade})"
+                fill = f"rgba(128,128,128,{0.05 + 0.25*shade})"
                 for node in tree[level].values():
                     x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
                     y0, y1 = node.bounds[0, 1], node.bounds[1, 1]
