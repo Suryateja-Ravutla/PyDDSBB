@@ -60,7 +60,7 @@ def ackley_2d(x):
 # Registry of objectives: name -> (dimension, callable, default_bounds_per_dim)
 # Registry: name -> (dimension, callable, default_bounds, latex_equation)
 OBJECTIVES: Dict[str, Tuple[int, Callable, Tuple[Tuple[float, float], ...], str]] = {
-    # 1D (4 existing + 2 new)
+    # 1D
     "Sine (sin(2πx))": (1, f_sin2pix, ((-1.0, 1.0),), r"\sin(2\pi x)"),
     "Sine (sin(3x) + 0.5 sin(7x))": (1, f_sin_combo, ((-1.0, 1.0),), r"\sin(3x) + 0.5\sin(7x)"),
     "Polynomial (x^3 - 0.5x^2 + 0.2x)": (1, f_poly, ((-1.0, 1.0),), r"x^3 - 0.5x^2 + 0.2x"),
@@ -98,7 +98,7 @@ def make_plot_1d(xs_true, ys_true, xopt: Optional[float], yopt: Optional[float],
 
 # -------------------- Streamlit UI --------------------
 st.set_page_config(page_title="PyDDSBB 1D & 2D Global Optimization", layout="wide")
-st.title("PyDDSBB demo: 1D & 2D Global Optimization")
+st.title("PyDDSBB: 1D & 2D Global Optimization")
 
 if PyDDSBB is None:
     st.error("PyDDSBB not available. On Streamlit Cloud, include GLPK in packages.txt and install PyDDSBB from GitHub in requirements.txt.")
@@ -116,10 +116,37 @@ with st.sidebar:
         (x2_min, x2_max) = st.slider("x₂ domain", -6.0, 6.0, default_bounds[1], step=0.1)
 
     seed = st.number_input("Random seed", 0, 999999, 42)
+
+    # Layout option for visualizations
+    layout_mode = "Vertical"
+    if dim == 2:
+        layout_mode = st.radio("2D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
+                               help="Arrange the four figures: Surface, Contour, Bounds, Search.")
+    else:
+        layout_mode = st.radio("1D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
+                               help="Arrange: Objective, Bounds, Search.")
+    st.header("Solver (PyDDSBB)")
+    n_init = st.number_input("Initial samples (n_init)", min_value=3, max_value=200, value=12, step=1)
+    split_method = st.selectbox("Split method", ["equal_bisection", "golden_section"])
+    variable_selection = st.selectbox("Variable selection", ["longest_side", "svr_var_select"])
+    multifidelity = st.checkbox("Multifidelity", value=False)
+    sense = st.selectbox("Sense", ["minimize", "maximize"], index=0)
+
+    st.subheader("Stopping criteria")
+    abs_tol = st.number_input("absolute_tolerance", value=1e-3, format="%.6f")
+    rel_tol = st.number_input("relative_tolerance", value=1e-3, format="%.6f")
+    min_bound = st.number_input("minimum_bound", value=0.01, format="%.4f")
+    sampling_limit = st.number_input("sampling_limit", min_value=10, max_value=20000, value=800, step=10)
+    time_limit = st.number_input("time_limit (s)", min_value=1.0, max_value=36000.0, value=20.0, step=1.0, format="%.1f")
+
+    st.divider()
+    auto_run = st.checkbox("Auto-run on change", value=False)
     run_btn = st.button("Run optimization")
     resume_btn = st.button("↻ Resume with more budget")
 
+
 # Build objective and model
+rng = np.random.default_rng(int(seed))
 
 def objective(x_arr):
     if dim == 1:
