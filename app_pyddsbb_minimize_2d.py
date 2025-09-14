@@ -61,11 +61,11 @@ def ackley_2d(x):
 # Registry: name -> (dimension, callable, default_bounds, latex_equation)
 OBJECTIVES: Dict[str, Tuple[int, Callable, Tuple[Tuple[float, float], ...], str]] = {
     # 1D
-    "Sine (sin(2πx))": (1, f_sin2pix, ((-1.0, 1.0),), r"\sin(2\pi x)"),
-    "Sine (sin(3x) + 0.5 sin(7x))": (1, f_sin_combo, ((-1.0, 1.0),), r"\sin(3x) + 0.5\sin(7x)"),
+    "sin(2πx)": (1, f_sin2pix, ((-1.0, 1.0),), r"\sin(2\pi x)"),
+    "sin(3x) + 0.5 sin(7x)": (1, f_sin_combo, ((-1.0, 1.0),), r"sin(3x) + 0.5sin(7x)"),
     "Polynomial (x^3 - 0.5x^2 + 0.2x)": (1, f_poly, ((-1.0, 1.0),), r"x^3 - 0.5x^2 + 0.2x"),
     "Gaussian bump": (1, f_gauss_bump, ((-1.0, 1.0),), r"exp(-((x - 0.2)^2) / 0.01) - 0.7exp(-((x - 0.75)^2) / 0.02)"),
-    "(1.4 - 3x)\, \sin(18x)": (1, f_modulated_sine, ((-1.0, 1.0),), r"(1.4 - 3x) * sin(8x)"),
+    "(1.4 - 3x) * sin(8x))": (1, f_modulated_sine, ((-1.0, 1.0),), r"(1.4 - 3x) * sin(8x)"),
     "\sin(x) + \sin(2.5x)": (1, f_sin_sum_2pt5, ((-2.0, 2.0),), r"sin(x) + sin(2.5x)"),
 
     # 2D
