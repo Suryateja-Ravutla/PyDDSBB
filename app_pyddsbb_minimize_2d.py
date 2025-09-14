@@ -11,7 +11,7 @@ try:
 except Exception:
     PyDDSBB = None
 
-# -------------------- 1D Functions (reduced to 4) --------------------
+# -------------------- 1D Functions --------------------
 def f_sin2pix(x):
     return np.sin(2 * np.pi * x)
 
@@ -24,6 +24,12 @@ def f_poly(x):
 def f_gauss_bump(x):
     return np.exp(-((x - 0.2) ** 2) / 0.01) - 0.7 * np.exp(-((x - 0.75) ** 2) / 0.02)
 
+def f_modulated_sine(x):
+    return (1.4 - 3.0 * x) * np.sin(18.0 * x)
+
+def f_sin_sum_2pt5(x):
+    return np.sin(x) + np.sin((10.0 / 4.0) * x)
+
 # -------------------- 2D Functions --------------------
 def multiGauss(x):
     x0, x1 = float(x[0]), float(x[1])
@@ -35,35 +41,43 @@ def multiGauss(x):
     return float(f)
 
 def himmelblau(x):
-    # Minima near (3,2), (-2.805,3.131), (-3.779,-3.283), (3.584,-1.848)
-    a = (x[0]**2 + x[1] - 11)**2
-    b = (x[0] + x[1]**2 - 7)**2
-    return float(a + b)
+    return float((x[0]**2 + x[1] - 11)**2 + (x[0] + x[1]**2 - 7)**2)
 
 def rosenbrock(x, a=1.0, b=100.0):
-    # Global min at (a, a^2) = (1,1) for a=1
     return float((a - x[0])**2 + b*(x[1] - x[0]**2)**2)
 
+def six_hump_camel(x):
+    return float((4 - 2.1*x[0]**2 + (x[0]**4)/3.0)*x[0]**2 + x[0]*x[1] + (-4 + 4*x[1]**2)*x[1]**2)
+
+def sphere_2d(x):
+    return float(x[0]**2 + x[1]**2)
+
+def ackley_2d(x):
+    x0, x1 = float(x[0]), float(x[1])
+    return float(-20.0*np.exp(-0.2*np.sqrt(0.5*(x0**2 + x1**2))) - np.exp(0.5*(np.cos(2*np.pi*x0) + np.cos(2*np.pi*x1))) + np.e + 20.0)\n
+
+
 # Registry of objectives: name -> (dimension, callable, default_bounds_per_dim)
-OBJECTIVES: Dict[str, Tuple[int, Callable, Tuple[Tuple[float, float], ...]]] = {
-    # 1D (exactly 4)
-    "Sine (sin(2πx))": (1, f_sin2pix, ((-1.0, 1.0),)),
-    "Sine (sin(3x) + 0.5 sin(7x))": (1, f_sin_combo, ((-1.0, 1.0),)),
-    "Polynomial (x^3 - 0.5x^2 + 0.2x)": (1, f_poly, ((-1.0, 1.0),)),
-    "Gaussian bump": (1, f_gauss_bump, ((-1.0, 1.0),)),
-    # 2D (+2 new functions)
-    "Multi-Gaussian (2D)": (2, multiGauss, ((-1.0, 1.0), (-1.0, 1.0))),
-    "Himmelblau (2D)": (2, himmelblau, ((-5.0, 5.0), (-5.0, 5.0))),
-    "Rosenbrock (2D)": (2, rosenbrock, ((-2.0, 2.0), (-1.0, 3.0))),
+# Registry: name -> (dimension, callable, default_bounds, latex_equation)
+OBJECTIVES: Dict[str, Tuple[int, Callable, Tuple[Tuple[float, float], ...], str]] = {
+    # 1D (4 existing + 2 new)
+    "Sine (sin(2πx))": (1, f_sin2pix, ((-1.0, 1.0),), r"\sin(2\pi x)"),
+    "Sine (sin(3x) + 0.5 sin(7x))": (1, f_sin_combo, ((-1.0, 1.0),), r"\sin(3x) + 0.5\sin(7x)"),
+    "Polynomial (x^3 - 0.5x^2 + 0.2x)": (1, f_poly, ((-1.0, 1.0),), r"x^3 - 0.5x^2 + 0.2x"),
+    "Gaussian bump": (1, f_gauss_bump, ((-1.0, 1.0),), r"e^{-\frac{(x-0.2)^2}{0.01}} - 0.7\, e^{-\frac{(x-0.75)^2}{0.02}}"),
+    "(1.4 - 3x)\, \sin(18x)": (1, f_modulated_sine, ((-1.0, 1.0),), r"(1.4 - 3x)\sin(18x)"),
+    "\sin(x) + \sin(2.5x)": (1, f_sin_sum_2pt5, ((-2.0, 2.0),), r"\sin(x) + \sin(2.5x)"),
+
+    # 2D
+    "Multi-Gaussian (2D)": (2, multiGauss, ((-1.0, 1.0), (-1.0, 1.0)), r"-0.5 e^{-100(x^2+y^2)} - 1.2 e^{-4((-1+x)^2+y^2)} - e^{-3(x^2+(0.5+y)^2)} - e^{-2((0.5+x)^2+y^2)} - 1.2 e^{-4(x^2+(-1+y)^2)}"),
+    "Himmelblau (2D)": (2, himmelblau, ((-5.0, 5.0), (-5.0, 5.0)), r"(x^2 + y - 11)^2 + (x + y^2 - 7)^2"),
+    "Rosenbrock (2D)": (2, rosenbrock, ((-2.0, 2.0), (-1.0, 3.0)), r"(1-x)^2 + 100(y-x^2)^2"),
+    "Six-Hump Camel (2D)": (2, six_hump_camel, ((-2.0, 2.0), (-1.2, 1.2)), r"(4 - 2.1x^2 + \tfrac{x^4}{3})x^2 + xy + (-4 + 4y^2)y^2"),
+    "Sphere (2D)": (2, sphere_2d, ((-3.0, 3.0), (-3.0, 3.0)), r"x^2 + y^2"),
+    "Ackley (2D)": (2, ackley_2d, ((-3.0, 3.0), (-3.0, 3.0)), r"-20 e^{-0.2 \sqrt{0.5(x^2+y^2)}} - e^{0.5(\cos 2\pi x + \cos 2\pi y)} + e + 20"),
 }
 
 # -------------------- Helpers --------------------
-def noisy_eval_1d(f1d: Callable[[np.ndarray], np.ndarray], x: float, noise_std: float, rng: np.random.Generator) -> float:
-    v = f1d(np.array([x]))
-    v = float(v[0] if isinstance(v, np.ndarray) else v)
-    v += rng.normal(0.0, noise_std) if noise_std > 0 else 0.0
-    return v
-
 def grid_eval_2d(f2d: Callable, x1_bounds: Tuple[float, float], x2_bounds: Tuple[float, float], n: int = 120):
     x = np.linspace(x1_bounds[0], x1_bounds[1], n)
     y = np.linspace(x2_bounds[0], x2_bounds[1], n)
@@ -74,10 +88,9 @@ def grid_eval_2d(f2d: Callable, x1_bounds: Tuple[float, float], x2_bounds: Tuple
             Z[i, j] = float(f2d([X[i, j], Y[i, j]]))
     return X, Y, Z
 
-def make_plot_1d(xs_true, ys_true, xs_obs, ys_obs, xopt: Optional[float], yopt: Optional[float], title="Objective landscape"):
+def make_plot_1d(xs_true, ys_true, xopt: Optional[float], yopt: Optional[float], title="Objective"):
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=xs_true, y=ys_true, mode="lines", name="True f(x)"))
-    fig.add_trace(go.Scatter(x=xs_obs, y=ys_obs, mode="lines", name="Observed f(x)"))
+    fig.add_trace(go.Scatter(x=xs_true, y=ys_true, mode="lines", name="f(x)"))
     if xopt is not None and yopt is not None:
         fig.add_trace(go.Scatter(x=[xopt], y=[yopt], mode="markers", name="PyDDSBB optimum", marker=dict(size=10)))
     fig.update_layout(title=title, xaxis_title="x", yaxis_title="f(x)", hovermode="x", height=520, margin=dict(l=10, r=10, t=40, b=10))
@@ -85,7 +98,7 @@ def make_plot_1d(xs_true, ys_true, xs_obs, ys_obs, xopt: Optional[float], yopt: 
 
 # -------------------- Streamlit UI --------------------
 st.set_page_config(page_title="PyDDSBB 1D & 2D Global Optimization", layout="wide")
-st.title("PyDDSBB: 1D & 2D Global Optimization")
+st.title("PyDDSBB demo: 1D & 2D Global Optimization")
 
 if PyDDSBB is None:
     st.error("PyDDSBB not available. On Streamlit Cloud, include GLPK in packages.txt and install PyDDSBB from GitHub in requirements.txt.")
@@ -94,7 +107,7 @@ if PyDDSBB is None:
 with st.sidebar:
     st.header("Objective")
     choice = st.selectbox("Choose objective", list(OBJECTIVES.keys()), index=0)
-    dim, f_obj, default_bounds = OBJECTIVES[choice]
+    dim, f_obj, default_bounds, eq_latex = OBJECTIVES[choice]
 
     if dim == 1:
         (x_min, x_max) = st.slider("Domain [x_min, x_max]", -6.0, 6.0, default_bounds[0], step=0.1)
@@ -103,59 +116,18 @@ with st.sidebar:
         (x2_min, x2_max) = st.slider("x₂ domain", -6.0, 6.0, default_bounds[1], step=0.1)
 
     seed = st.number_input("Random seed", 0, 999999, 42)
-
-    st.subheader("Noise")
-    noise_std = st.slider("Noise σ", 0.0, 0.5, 0.0, step=0.01)
-    apply_noise_opt = st.checkbox("Enable noise in optimization", value=False)
-    apply_noise_viz = st.checkbox("Apply noise to plotted curves/surfaces", value=False,
-                                  help="Adds noise to the rendered line/surface/contour (visualization only).")
-    # Layout option for 2D visualizations
-    layout_mode = "Vertical"
-    if dim == 2:
-        layout_mode = st.radio("2D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
-                               help="Arrange the four figures: Surface, Contour, Bounds, Search.")
-    else:
-        layout_mode = st.radio("1D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
-                               help="Arrange: Objective, Bounds, Search.")
-        layout_mode = st.radio("2D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
-                               help="Arrange the four figures: Surface, Contour, Bounds, Search.")
-
-
-    st.header("Solver (PyDDSBB)")
-    n_init = st.number_input("Initial samples (n_init)", min_value=3, max_value=200, value=12, step=1)
-    split_method = st.selectbox("Split method", ["equal_bisection", "golden_section"])
-    variable_selection = st.selectbox("Variable selection", ["longest_side", "svr_var_select"])
-    multifidelity = st.checkbox("Multifidelity", value=False)
-    sense = st.selectbox("Sense", ["minimize", "maximize"], index=0)
-
-    st.subheader("Stopping criteria")
-    abs_tol = st.number_input("absolute_tolerance", value=1e-3, format="%.6f")
-    rel_tol = st.number_input("relative_tolerance", value=1e-3, format="%.6f")
-    min_bound = st.number_input("minimum_bound", value=0.01, format="%.4f")
-    sampling_limit = st.number_input("sampling_limit", min_value=10, max_value=20000, value=800, step=10)
-    time_limit = st.number_input("time_limit (s)", min_value=1.0, max_value=36000.0, value=20.0, step=1.0, format="%.1f")
-
-    st.divider()
-    auto_run = st.checkbox("Auto-run on change", value=False)
     run_btn = st.button("Run optimization")
     resume_btn = st.button("↻ Resume with more budget")
 
 # Build objective and model
-rng = np.random.default_rng(int(seed))
 
 def objective(x_arr):
     if dim == 1:
         xval = float(x_arr[0])
-        if apply_noise_opt and noise_std > 0:
-            return noisy_eval_1d(f_obj, xval, noise_std, rng)
-        else:
-            v = f_obj(np.array([xval]))
-            return float(v[0] if isinstance(v, np.ndarray) else v)
+        v = f_obj(np.array([xval]))
+        return float(v[0] if isinstance(v, np.ndarray) else v)
     else:
-        val = float(f_obj(x_arr))
-        if apply_noise_opt and noise_std > 0:
-            val += float(rng.normal(0.0, noise_std))
-        return val
+        return float(f_obj(x_arr))
 
 model = PyDDSBB.DDSBBModel.Problem()
 model.add_objective(objective, sense=sense)
@@ -186,7 +158,7 @@ cfg = (
     (x_min, x_max) if dim == 1 else (x1_min, x1_max, x2_min, x2_max),
     int(n_init), split_method, variable_selection, bool(multifidelity), sense,
     float(abs_tol), float(rel_tol), float(min_bound), int(sampling_limit), float(time_limit),
-    float(noise_std), bool(apply_noise_opt), bool(apply_noise_viz), int(seed)
+    int(seed)
 )
 
 def new_solver():
@@ -239,13 +211,10 @@ with col_main:
         xs_true = np.linspace(x_min, x_max, 600)
         ys_true = f_obj(xs_true)
         xs_obs, ys_obs = xs_true, ys_true.copy()
-        if apply_noise_viz and noise_std > 0:
-            rng_vis = np.random.default_rng(int(seed))
-            ys_obs = ys_obs + rng_vis.normal(0.0, noise_std, size=ys_obs.shape)
-
+        
         xopt = st.session_state.result["xopt"] if st.session_state.result else None
         yopt = st.session_state.result["yopt"] if st.session_state.result else None
-        fig_obj = make_plot_1d(xs_true, ys_true, xs_obs, ys_obs, xopt, yopt, title=f"{choice}")
+        fig_obj = make_plot_1d(xs_true, ys_true, xopt, yopt, title=f"{choice}")
 
         # --- Figure B: Upper/Lower Bound Evolution (Plotly) ---
         fig_bounds = None
@@ -255,7 +224,7 @@ with col_main:
             xlv = list(range(len(lb)))
             fig_bounds = go.Figure()
             fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound",line=dict(color="orange", width=2), marker=dict(color="orange", size=6)))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
                                      height=420, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
@@ -269,7 +238,7 @@ with col_main:
             n_levels = max(levels) + 1 if len(levels) else 1
             for level in levels:
                 shade = level / max(1, n_levels)
-                fill = f"rgba(128,128,128,{0.05 + 0.1*shade})"
+                fill = f"rgba(128,128,128,{0.15 + 0.5*shade})"
                 for node in tree[level].values():
                     x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
                     y0, y1 = level, level + 0.8
@@ -286,7 +255,7 @@ with col_main:
             fig_search = go.Figure()
             if scat_x:
                 fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
-                                                name="Samples", marker=dict(size=6, color="orange", line=dict(width=0.5))))
+                                                name="Samples", marker=dict(size=6, line=dict(width=0.5))))
             fig_search.update_layout(title="Search Space Branching & Sampling (1D)",
                                      xaxis_title="x", yaxis_title="Level",
                                      height=420, margin=dict(l=10, r=10, t=40, b=10),
@@ -331,9 +300,6 @@ with col_main:
 
         X, Y, Z = grid_eval_2d(f_obj, (x1_min, x1_max), (x2_min, x2_max), n=140)
         Z_plot = Z.copy()
-        if apply_noise_viz and noise_std > 0:
-            rng_vis = np.random.default_rng(int(seed))
-            Z_plot = Z_plot + rng_vis.normal(0.0, noise_std, size=Z_plot.shape)
 
         # Prepare all four figures
         surf = go.Figure(data=[go.Surface(z=Z_plot, x=X, y=Y, opacity=0.95, showscale=True, name="f(x1,x2)")])
@@ -360,7 +326,7 @@ with col_main:
             xlv = list(range(len(lb)))
             fig_bounds = go.Figure()
             fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound",line=dict(color="orange", width=2), marker=dict(color="orange", size=6)))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
                                      height=520, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
@@ -373,7 +339,7 @@ with col_main:
             n_levels = max(levels) + 1 if len(levels) else 1
             for level in levels:
                 shade = level / max(1, n_levels)
-                fill = f"rgba(128,128,128,{0.05 + 0.1*shade})"
+                fill = f"rgba(128,128,128,{0.15 + 0.5*shade})"
                 for node in tree[level].values():
                     x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
                     y0, y1 = node.bounds[0, 1], node.bounds[1, 1]
@@ -390,7 +356,7 @@ with col_main:
             fig_search = go.Figure()
             if scat_x:
                 fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
-                                                name="Samples", marker=dict(size=6, color="orange", line=dict(width=0.5))))
+                                                name="Samples", marker=dict(size=6, line=dict(width=0.5))))
             fig_search.update_layout(title="Search Space Branching & Sampling",
                                      xaxis_title="x₁", yaxis_title="x₂", height=520,
                                      margin=dict(l=10, r=10, t=40, b=10), shapes=shapes)
@@ -445,6 +411,5 @@ with col_side:
         st.metric("f(x*)", f"{yopt:.6g}")
         st.caption(f"Elapsed: {st.session_state.result['elapsed']:.2f} s")
         st.caption(f"n_init: {n_init} · split: {split_method} · var sel: {variable_selection}")
-        st.caption(f"noise σ: {noise_std} · noise opt: {apply_noise_opt} · noise viz: {apply_noise_viz}")
-
+        
 st.caption("PyDDSBB solves a black-box global optimization by sampling, building underestimators, and branching the domain. This demo supports 1D and 2D objectives.")
