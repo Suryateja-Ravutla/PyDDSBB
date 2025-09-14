@@ -54,7 +54,7 @@ def sphere_2d(x):
 
 def ackley_2d(x):
     x0, x1 = float(x[0]), float(x[1])
-    return float(-20.0*np.exp(-0.2*np.sqrt(0.5*(x0**2 + x1**2))) - np.exp(0.5*(np.cos(2*np.pi*x0) + np.cos(2*np.pi*x1))) + np.e + 20.0)\n
+    return float(-20.0*np.exp(-0.2*np.sqrt(0.5*(x0**2 + x1**2))) - np.exp(0.5*(np.cos(2*np.pi*x0) + np.cos(2*np.pi*x1))) + np.exp(1) + 20.0)
 
 
 # Registry of objectives: name -> (dimension, callable, default_bounds_per_dim)
