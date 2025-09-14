@@ -209,10 +209,13 @@ if should_run and st.session_state.solver is not None:
         elapsed = time.time() - start
         yopt = float(st.session_state.solver.get_optimum())
         xopt_arr = st.session_state.solver.get_optimizer()
+        # Robustly coerce to 1D float array, handling shapes like (2,), (1,2), (2,1), lists, etc.
+        import numpy as _np
+        _xv = _np.array(xopt_arr, dtype=float).reshape(-1)
         if dim == 1:
-            xopt = float(xopt_arr[0])
+            xopt = float(_xv[0])
         else:
-            xopt = (float(xopt_arr[0]), float(xopt_arr[1]))
+            xopt = (float(_xv[0]), float(_xv[1]))
         st.session_state.result = {"xopt": xopt, "yopt": yopt, "elapsed": elapsed}
 
 # ---- Visualization
