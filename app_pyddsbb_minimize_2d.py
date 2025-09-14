@@ -85,7 +85,7 @@ def make_plot_1d(xs_true, ys_true, xs_obs, ys_obs, xopt: Optional[float], yopt: 
 
 # -------------------- Streamlit UI --------------------
 st.set_page_config(page_title="PyDDSBB 1D & 2D Global Optimization", layout="wide")
-st.title("🧭 PyDDSBB: 1D & 2D Global Optimization (dynamic sampling)")
+st.title("PyDDSBB: 1D & 2D Global Optimization")
 
 if PyDDSBB is None:
     st.error("PyDDSBB not available. On Streamlit Cloud, include GLPK in packages.txt and install PyDDSBB from GitHub in requirements.txt.")
@@ -137,7 +137,7 @@ with st.sidebar:
 
     st.divider()
     auto_run = st.checkbox("Auto-run on change", value=False)
-    run_btn = st.button("🚀 Run optimization")
+    run_btn = st.button("Run optimization")
     resume_btn = st.button("↻ Resume with more budget")
 
 # Build objective and model
@@ -390,7 +390,7 @@ with col_main:
             fig_search = go.Figure()
             if scat_x:
                 fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
-                                                name="Samples", marker=dict(size=6, line=dict(width=0.5))))
+                                                name="Samples", marker=dict(size=6, color="red", line=dict(width=0.5))))
             fig_search.update_layout(title="Search Space Branching & Sampling",
                                      xaxis_title="x₁", yaxis_title="x₂", height=520,
                                      margin=dict(l=10, r=10, t=40, b=10), shapes=shapes)
