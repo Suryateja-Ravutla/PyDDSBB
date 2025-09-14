@@ -106,7 +106,7 @@ if PyDDSBB is None:
 
 with st.sidebar:
     st.header("Objective")
-    choice = st.selectbox("Choose objective", list(OBJECTIVES.keys()), index=0)
+    choice = st.selectbox("Choose objective", list(OBJECTIVES.keys()), index=9)
     dim, f_obj, default_bounds, eq_latex = OBJECTIVES[choice]
 
     if dim == 1:
