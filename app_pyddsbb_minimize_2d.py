@@ -109,6 +109,17 @@ with st.sidebar:
     apply_noise_opt = st.checkbox("Enable noise in optimization", value=False)
     apply_noise_viz = st.checkbox("Apply noise to plotted curves/surfaces", value=False,
                                   help="Adds noise to the rendered line/surface/contour (visualization only).")
+    # Layout option for 2D visualizations
+    layout_mode = "Vertical"
+    if dim == 2:
+        layout_mode = st.radio("2D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
+                               help="Arrange the four figures: Surface, Contour, Bounds, Search.")
+    else:
+        layout_mode = st.radio("1D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
+                               help="Arrange: Objective, Bounds, Search.")
+        layout_mode = st.radio("2D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
+                               help="Arrange the four figures: Surface, Contour, Bounds, Search.")
+
 
     st.header("Solver (PyDDSBB)")
     n_init = st.number_input("Initial samples (n_init)", min_value=3, max_value=200, value=12, step=1)
@@ -223,6 +234,7 @@ col_main, col_side = st.columns([4, 1.4])
 
 with col_main:
     if dim == 1:
+
         # 1D line plot (true vs observed) + optimum
         xs_true = np.linspace(x_min, x_max, 600)
         ys_true = f_obj(xs_true)
@@ -233,10 +245,86 @@ with col_main:
 
         xopt = st.session_state.result["xopt"] if st.session_state.result else None
         yopt = st.session_state.result["yopt"] if st.session_state.result else None
-        fig1d = make_plot_1d(xs_true, ys_true, xs_obs, ys_obs, xopt, yopt, title=f"{choice}")
-        st.plotly_chart(fig1d, use_container_width=True)
+        fig_obj = make_plot_1d(xs_true, ys_true, xs_obs, ys_obs, xopt, yopt, title=f"{choice}")
+
+        # --- Figure B: Upper/Lower Bound Evolution (Plotly) ---
+        fig_bounds = None
+        if st.session_state.solver is not None and hasattr(st.session_state.solver, "_lowerbound_hist") and hasattr(st.session_state.solver, "_upperbound_hist"):
+            lb = list(st.session_state.solver._lowerbound_hist)
+            ub = list(st.session_state.solver._upperbound_hist)
+            xlv = list(range(len(lb)))
+            fig_bounds = go.Figure()
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"))
+            fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
+                                     height=420, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
+
+        # --- Figure C: Search Space Branching & Sampling (1D) ---
+        fig_search = None
+        if st.session_state.solver is not None and hasattr(st.session_state.solver, "Tree"):
+            tree = st.session_state.solver.Tree
+            shapes = []
+            scat_x, scat_y = [], []
+            levels = sorted(list(tree.keys()))
+            n_levels = max(levels) + 1 if len(levels) else 1
+            for level in levels:
+                shade = level / max(1, n_levels)
+                fill = f"rgba(128,128,128,{0.15 + 0.5*shade})"
+                for node in tree[level].values():
+                    x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
+                    y0, y1 = level, level + 0.8
+                    shapes.append(dict(
+                        type="rect", xref="x", yref="y",
+                        x0=x0, x1=x1, y0=y0, y1=y1,
+                        line=dict(color="white", width=0.5),
+                        fillcolor=fill,
+                    ))
+                    if hasattr(node, "x") and node.x is not None and len(node.x) > 0:
+                        scat_x.extend(node.x[:, 0].tolist())
+                        scat_y.extend([level + 0.4] * node.x.shape[0])
+
+            fig_search = go.Figure()
+            if scat_x:
+                fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
+                                                name="Samples", marker=dict(size=6, line=dict(width=0.5))))
+            fig_search.update_layout(title="Search Space Branching & Sampling (1D)",
+                                     xaxis_title="x", yaxis_title="Level",
+                                     height=420, margin=dict(l=10, r=10, t=40, b=10),
+                                     shapes=shapes, yaxis=dict(autorange="reversed"))
+
+        # --- Layout for 1D ---
+        if layout_mode == "2×2 grid":
+            c1, c2 = st.columns(2)
+            with c1:
+                st.plotly_chart(fig_obj, use_container_width=True)
+            with c2:
+                if fig_bounds is not None:
+                    st.plotly_chart(fig_bounds, use_container_width=True)
+            c3, c4 = st.columns(2)
+            with c3:
+                if fig_search is not None:
+                    st.plotly_chart(fig_search, use_container_width=True)
+            with c4:
+                st.empty()  # placeholder
+        elif layout_mode == "Tabs":
+            tabs = st.tabs(["Objective", "Bounds", "Search"])
+            with tabs[0]:
+                st.plotly_chart(fig_obj, use_container_width=True)
+            with tabs[1]:
+                if fig_bounds is not None:
+                    st.plotly_chart(fig_bounds, use_container_width=True)
+            with tabs[2]:
+                if fig_search is not None:
+                    st.plotly_chart(fig_search, use_container_width=True)
+        else:  # Vertical
+            st.plotly_chart(fig_obj, use_container_width=True)
+            if fig_bounds is not None:
+                st.plotly_chart(fig_bounds, use_container_width=True)
+            if fig_search is not None:
+                st.plotly_chart(fig_search, use_container_width=True)
 
     else:
+
         # 2D Surface plot (Plotly)
         xopt = st.session_state.result["xopt"] if st.session_state.result else None
         yopt = st.session_state.result["yopt"] if st.session_state.result else None
@@ -247,6 +335,7 @@ with col_main:
             rng_vis = np.random.default_rng(int(seed))
             Z_plot = Z_plot + rng_vis.normal(0.0, noise_std, size=Z_plot.shape)
 
+        # Prepare all four figures
         surf = go.Figure(data=[go.Surface(z=Z_plot, x=X, y=Y, opacity=0.95, showscale=True, name="f(x1,x2)")])
         if xopt is not None and yopt is not None:
             surf.add_trace(go.Scatter3d(x=[xopt[0]], y=[xopt[1]], z=[yopt],
@@ -255,9 +344,7 @@ with col_main:
         surf.update_layout(title="Objective Surface with Optimum", scene=dict(
             xaxis_title="x₁", yaxis_title="x₂", zaxis_title="f(x)"
         ), height=520, margin=dict(l=10, r=10, t=40, b=10))
-        st.plotly_chart(surf, use_container_width=True)
 
-        # 2D Contour plot (Plotly)
         contour = go.Figure(data=[go.Contour(z=Z_plot, x=X[0], y=Y[:,0], contours=dict(showlabels=True))])
         if xopt is not None:
             contour.add_trace(go.Scatter(x=[xopt[0]], y=[xopt[1]], mode="markers",
@@ -265,9 +352,8 @@ with col_main:
                                          name="PyDDSBB optimum"))
         contour.update_layout(title="Contour Plot with Optimum", xaxis_title="x₁", yaxis_title="x₂",
                               height=520, margin=dict(l=10, r=10, t=40, b=10))
-        st.plotly_chart(contour, use_container_width=True)
 
-        # --- Figure 3: Upper/Lower Bound Evolution (Plotly) ---
+        fig_bounds = None
         if hasattr(st.session_state.solver, "_lowerbound_hist") and hasattr(st.session_state.solver, "_upperbound_hist"):
             lb = list(st.session_state.solver._lowerbound_hist)
             ub = list(st.session_state.solver._upperbound_hist)
@@ -276,18 +362,15 @@ with col_main:
             fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
             fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
-                                     height=420, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
-            st.plotly_chart(fig_bounds, use_container_width=True)
+                                     height=520, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
-        # --- Figure 4: Search Space Branching & Sampling (Plotly) ---
-        if hasattr(st.session_state.solver, "Tree") and dim == 2:
+        fig_search = None
+        if hasattr(st.session_state.solver, "Tree"):
             tree = st.session_state.solver.Tree
             shapes = []
             scat_x, scat_y = [], []
             levels = sorted(list(tree.keys()))
             n_levels = max(levels) + 1 if len(levels) else 1
-
-            # Add rectangle shapes and sampled points
             for level in levels:
                 shade = level / max(1, n_levels)
                 fill = f"rgba(128,128,128,{0.15 + 0.5*shade})"
@@ -311,7 +394,42 @@ with col_main:
             fig_search.update_layout(title="Search Space Branching & Sampling",
                                      xaxis_title="x₁", yaxis_title="x₂", height=520,
                                      margin=dict(l=10, r=10, t=40, b=10), shapes=shapes)
-            st.plotly_chart(fig_search, use_container_width=True)
+
+        # Layout selection
+        if layout_mode == "2×2 grid":
+            c1, c2 = st.columns(2)
+            with c1:
+                st.plotly_chart(surf, use_container_width=True)
+            with c2:
+                st.plotly_chart(contour, use_container_width=True)
+            c3, c4 = st.columns(2)
+            with c3:
+                if fig_bounds is not None:
+                    st.plotly_chart(fig_bounds, use_container_width=True)
+            with c4:
+                if fig_search is not None:
+                    st.plotly_chart(fig_search, use_container_width=True)
+
+        elif layout_mode == "Tabs":
+            tabs = st.tabs(["Surface", "Contour", "Bounds", "Search"])
+            with tabs[0]:
+                st.plotly_chart(surf, use_container_width=True)
+            with tabs[1]:
+                st.plotly_chart(contour, use_container_width=True)
+            with tabs[2]:
+                if fig_bounds is not None:
+                    st.plotly_chart(fig_bounds, use_container_width=True)
+            with tabs[3]:
+                if fig_search is not None:
+                    st.plotly_chart(fig_search, use_container_width=True)
+
+        else:  # Vertical
+            st.plotly_chart(surf, use_container_width=True)
+            st.plotly_chart(contour, use_container_width=True)
+            if fig_bounds is not None:
+                st.plotly_chart(fig_bounds, use_container_width=True)
+            if fig_search is not None:
+                st.plotly_chart(fig_search, use_container_width=True)
 
 with col_side:
     st.subheader("Result")
