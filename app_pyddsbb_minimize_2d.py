@@ -286,7 +286,7 @@ with col_main:
             fig_search = go.Figure()
             if scat_x:
                 fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
-                                                name="Samples", marker=dict(size=6, line=dict(width=0.5))))
+                                                name="Samples", marker=dict(size=6, color="red", line=dict(width=0.5))))
             fig_search.update_layout(title="Search Space Branching & Sampling (1D)",
                                      xaxis_title="x", yaxis_title="Level",
                                      height=420, margin=dict(l=10, r=10, t=40, b=10),
