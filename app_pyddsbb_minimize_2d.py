@@ -255,7 +255,7 @@ with col_main:
             xlv = list(range(len(lb)))
             fig_bounds = go.Figure()
             fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"),line=dict(color="orange", width=2), marker=dict(color="orange", size=6))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
                                      height=420, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
@@ -269,7 +269,7 @@ with col_main:
             n_levels = max(levels) + 1 if len(levels) else 1
             for level in levels:
                 shade = level / max(1, n_levels)
-                fill = f"rgba(128,128,128,{0.05 + 0.25*shade})"
+                fill = f"rgba(128,128,128,{0.05 + 0.1*shade})"
                 for node in tree[level].values():
                     x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
                     y0, y1 = level, level + 0.8
@@ -286,7 +286,7 @@ with col_main:
             fig_search = go.Figure()
             if scat_x:
                 fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
-                                                name="Samples", marker=dict(size=6, color="red", line=dict(width=0.5))))
+                                                name="Samples", marker=dict(size=6, color="yellow", line=dict(width=0.5))))
             fig_search.update_layout(title="Search Space Branching & Sampling (1D)",
                                      xaxis_title="x", yaxis_title="Level",
                                      height=420, margin=dict(l=10, r=10, t=40, b=10),
@@ -360,7 +360,7 @@ with col_main:
             xlv = list(range(len(lb)))
             fig_bounds = go.Figure()
             fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"),line=dict(color="orange", width=2), marker=dict(color="orange", size=6))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
                                      height=520, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
@@ -373,7 +373,7 @@ with col_main:
             n_levels = max(levels) + 1 if len(levels) else 1
             for level in levels:
                 shade = level / max(1, n_levels)
-                fill = f"rgba(128,128,128,{0.05 + 0.25*shade})"
+                fill = f"rgba(128,128,128,{0.05 + 0.1*shade})"
                 for node in tree[level].values():
                     x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
                     y0, y1 = node.bounds[0, 1], node.bounds[1, 1]
@@ -390,7 +390,7 @@ with col_main:
             fig_search = go.Figure()
             if scat_x:
                 fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
-                                                name="Samples", marker=dict(size=6, color="red", line=dict(width=0.5))))
+                                                name="Samples", marker=dict(size=6, color="yellow", line=dict(width=0.5))))
             fig_search.update_layout(title="Search Space Branching & Sampling",
                                      xaxis_title="x₁", yaxis_title="x₂", height=520,
                                      margin=dict(l=10, r=10, t=40, b=10), shapes=shapes)
