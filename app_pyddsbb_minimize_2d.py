@@ -25,7 +25,7 @@ def f_gauss_bump(x):
     return np.exp(-((x - 0.2) ** 2) / 0.01) - 0.7 * np.exp(-((x - 0.75) ** 2) / 0.02)
 
 def f_modulated_sine(x):
-    return (1.4 - 3.0 * x) * np.sin(18.0 * x)
+    return (1.4 - 3.0 * x) * np.sin(8.0 * x)
 
 def f_sin_sum_2pt5(x):
     return np.sin(x) + np.sin((10.0 / 4.0) * x)
@@ -64,17 +64,17 @@ OBJECTIVES: Dict[str, Tuple[int, Callable, Tuple[Tuple[float, float], ...], str]
     "Sine (sin(2πx))": (1, f_sin2pix, ((-1.0, 1.0),), r"\sin(2\pi x)"),
     "Sine (sin(3x) + 0.5 sin(7x))": (1, f_sin_combo, ((-1.0, 1.0),), r"\sin(3x) + 0.5\sin(7x)"),
     "Polynomial (x^3 - 0.5x^2 + 0.2x)": (1, f_poly, ((-1.0, 1.0),), r"x^3 - 0.5x^2 + 0.2x"),
-    "Gaussian bump": (1, f_gauss_bump, ((-1.0, 1.0),), r"e^{-\frac{(x-0.2)^2}{0.01}} - 0.7\, e^{-\frac{(x-0.75)^2}{0.02}}"),
-    "(1.4 - 3x)\, \sin(18x)": (1, f_modulated_sine, ((-1.0, 1.0),), r"(1.4 - 3x)\sin(18x)"),
-    "\sin(x) + \sin(2.5x)": (1, f_sin_sum_2pt5, ((-2.0, 2.0),), r"\sin(x) + \sin(2.5x)"),
+    "Gaussian bump": (1, f_gauss_bump, ((-1.0, 1.0),), r"exp(-((x - 0.2)^2) / 0.01) - 0.7exp(-((x - 0.75)^2) / 0.02)"),
+    "(1.4 - 3x)\, \sin(18x)": (1, f_modulated_sine, ((-1.0, 1.0),), r"(1.4 - 3x) * sin(8x)"),
+    "\sin(x) + \sin(2.5x)": (1, f_sin_sum_2pt5, ((-2.0, 2.0),), r"sin(x) + sin(2.5x)"),
 
     # 2D
     "Multi-Gaussian (2D)": (2, multiGauss, ((-1.0, 1.0), (-1.0, 1.0)), r"-0.5 e^{-100(x^2+y^2)} - 1.2 e^{-4((-1+x)^2+y^2)} - e^{-3(x^2+(0.5+y)^2)} - e^{-2((0.5+x)^2+y^2)} - 1.2 e^{-4(x^2+(-1+y)^2)}"),
     "Himmelblau (2D)": (2, himmelblau, ((-5.0, 5.0), (-5.0, 5.0)), r"(x^2 + y - 11)^2 + (x + y^2 - 7)^2"),
     "Rosenbrock (2D)": (2, rosenbrock, ((-2.0, 2.0), (-1.0, 3.0)), r"(1-x)^2 + 100(y-x^2)^2"),
-    "Six-Hump Camel (2D)": (2, six_hump_camel, ((-2.0, 2.0), (-1.2, 1.2)), r"(4 - 2.1x^2 + \tfrac{x^4}{3})x^2 + xy + (-4 + 4y^2)y^2"),
+    "Six-Hump Camel (2D)": (2, six_hump_camel, ((-2.0, 2.0), (-1.2, 1.2)), r"(4 - 2.1x^2 + x^4/3)x^2 + xy + (-4 + 4y^2)y^2"),
     "Sphere (2D)": (2, sphere_2d, ((-3.0, 3.0), (-3.0, 3.0)), r"x^2 + y^2"),
-    "Ackley (2D)": (2, ackley_2d, ((-3.0, 3.0), (-3.0, 3.0)), r"-20 e^{-0.2 \sqrt{0.5(x^2+y^2)}} - e^{0.5(\cos 2\pi x + \cos 2\pi y)} + e + 20"),
+    "Ackley (2D)": (2, ackley_2d, ((-3.0, 3.0), (-3.0, 3.0)), r"-20exp(-0.2sqrt(0.5(x^2 + y^2))) - exp(0.5(cos(2pi*x) + np.cos(2pi*y))) + exp(1) + 20"),
 }
 
 # -------------------- Helpers --------------------
@@ -250,8 +250,8 @@ with col_main:
             ub = list(st.session_state.solver._upperbound_hist)
             xlv = list(range(len(lb)))
             fig_bounds = go.Figure()
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound", line=dict(width=2)))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound", line=dict(color="orange", width=2), marker=dict(color="orange", size=6)))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
                                      height=420, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
@@ -265,7 +265,7 @@ with col_main:
             n_levels = max(levels) + 1 if len(levels) else 1
             for level in levels:
                 shade = level / max(1, n_levels)
-                fill = f"rgba(128,128,128,{0.15 + 0.5*shade})"
+                fill = f"rgba(128,128,128,{0.05 + 0.05*shade})"
                 for node in tree[level].values():
                     x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
                     y0, y1 = level, level + 0.8
@@ -282,7 +282,7 @@ with col_main:
             fig_search = go.Figure()
             if scat_x:
                 fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
-                                                name="Samples", marker=dict(size=6, line=dict(width=0.5))))
+                                                name="Samples", marker=dict(size=6, color="orange", line=dict(width=0.5))))
             fig_search.update_layout(title="Search Space Branching & Sampling (1D)",
                                      xaxis_title="x", yaxis_title="Level",
                                      height=420, margin=dict(l=10, r=10, t=40, b=10),
@@ -352,8 +352,8 @@ with col_main:
             ub = list(st.session_state.solver._upperbound_hist)
             xlv = list(range(len(lb)))
             fig_bounds = go.Figure()
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound", line=dict(width=2)))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound", line=dict(color="orange", width=2), marker=dict(color="orange", size=6)))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
                                      height=520, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
@@ -366,7 +366,7 @@ with col_main:
             n_levels = max(levels) + 1 if len(levels) else 1
             for level in levels:
                 shade = level / max(1, n_levels)
-                fill = f"rgba(128,128,128,{0.15 + 0.5*shade})"
+                fill = f"rgba(128,128,128,{0.05 + 0.05*shade})"
                 for node in tree[level].values():
                     x0, x1 = node.bounds[0, 0], node.bounds[1, 0]
                     y0, y1 = node.bounds[0, 1], node.bounds[1, 1]
@@ -383,7 +383,7 @@ with col_main:
             fig_search = go.Figure()
             if scat_x:
                 fig_search.add_trace(go.Scatter(x=scat_x, y=scat_y, mode="markers",
-                                                name="Samples", marker=dict(size=6, line=dict(width=0.5))))
+                                                name="Samples", marker=dict(size=6, color="orange",line=dict(width=0.5))))
             fig_search.update_layout(title="Search Space Branching & Sampling",
                                      xaxis_title="x₁", yaxis_title="x₂", height=520,
                                      margin=dict(l=10, r=10, t=40, b=10), shapes=shapes)
