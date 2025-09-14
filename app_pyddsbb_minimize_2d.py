@@ -66,7 +66,7 @@ OBJECTIVES: Dict[str, Tuple[int, Callable, Tuple[Tuple[float, float], ...], str]
     "Polynomial (x^3 - 0.5x^2 + 0.2x)": (1, f_poly, ((-1.0, 1.0),), r"x^3 - 0.5x^2 + 0.2x"),
     "Gaussian bump": (1, f_gauss_bump, ((-1.0, 1.0),), r"exp(-((x - 0.2)^2) / 0.01) - 0.7exp(-((x - 0.75)^2) / 0.02)"),
     "(1.4 - 3x) * sin(8x))": (1, f_modulated_sine, ((-1.0, 1.0),), r"(1.4 - 3x) * sin(8x)"),
-    "\sin(x) + \sin(2.5x)": (1, f_sin_sum_2pt5, ((-2.0, 2.0),), r"sin(x) + sin(2.5x)"),
+    "sin(x) + sin(2.5x)": (1, f_sin_sum_2pt5, ((-2.0, 2.0),), r"sin(x) + sin(2.5x)"),
 
     # 2D
     "Multi-Gaussian (2D)": (2, multiGauss, ((-1.0, 1.0), (-1.0, 1.0)), r"-0.5 e^{-100(x^2+y^2)} - 1.2 e^{-4((-1+x)^2+y^2)} - e^{-3(x^2+(0.5+y)^2)} - e^{-2((0.5+x)^2+y^2)} - 1.2 e^{-4(x^2+(-1+y)^2)}"),
