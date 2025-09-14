@@ -255,7 +255,7 @@ with col_main:
             xlv = list(range(len(lb)))
             fig_bounds = go.Figure()
             fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"),line=dict(color="orange", width=2), marker=dict(color="orange", size=6))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound",line=dict(color="orange", width=2), marker=dict(color="orange", size=6)))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
                                      height=420, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
@@ -360,7 +360,7 @@ with col_main:
             xlv = list(range(len(lb)))
             fig_bounds = go.Figure()
             fig_bounds.add_trace(go.Scatter(x=xlv, y=ub, mode="lines+markers", name="Upper Bound"))
-            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound"),line=dict(color="orange", width=2), marker=dict(color="orange", size=6))
+            fig_bounds.add_trace(go.Scatter(x=xlv, y=lb, mode="lines+markers", name="Lower Bound",line=dict(color="orange", width=2), marker=dict(color="orange", size=6)))
             fig_bounds.update_layout(title="Lower & Upper Bound Evolution", xaxis_title="Level", yaxis_title="f(x)",
                                      height=520, margin=dict(l=10, r=10, t=40, b=10), legend=dict(orientation="h"))
 
