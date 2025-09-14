@@ -98,7 +98,7 @@ def make_plot_1d(xs_true, ys_true, xopt: Optional[float], yopt: Optional[float],
 
 # -------------------- Streamlit UI --------------------
 st.set_page_config(page_title="PyDDSBB 1D & 2D Global Optimization", layout="wide")
-st.title("PyDDSBB: 1D & 2D Global Optimization")
+st.title("PyDDSBB Demo : 1D & 2D Global Optimization")
 
 if PyDDSBB is None:
     st.error("PyDDSBB not available. On Streamlit Cloud, include GLPK in packages.txt and install PyDDSBB from GitHub in requirements.txt.")
