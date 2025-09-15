@@ -118,7 +118,7 @@ with st.sidebar:
     seed = st.number_input("Random seed", 0, 999999, 42)
 
     # Layout option for visualizations
-    layout_mode = "Vertical"
+    layout_mode = "Tabs"
     if dim == 2:
         layout_mode = st.radio("2D layout", ["2×2 grid", "Tabs", "Vertical"], index=0,
                                help="Arrange the four figures: Surface, Contour, Bounds, Search.")
