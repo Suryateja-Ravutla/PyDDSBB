@@ -1,3 +1,2 @@
 # System solvers required by PyDDSBB/Pyomo
-coinor-ipopt
 glpk-utils
