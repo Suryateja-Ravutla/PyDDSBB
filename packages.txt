@@ -1,2 +1,0 @@
-# System solvers required by PyDDSBB/Pyomo
-glpk-utils
